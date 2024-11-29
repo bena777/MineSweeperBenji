@@ -2,7 +2,6 @@
 #ifndef PROJECT4_TILE_H
 #define PROJECT4_TILE_H
 #include <SFML/Graphics.hpp>
-#include "Toolbox.h"
 
 class Tile {
     friend class Toolbox;

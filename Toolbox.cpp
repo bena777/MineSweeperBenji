@@ -12,10 +12,12 @@ Toolbox& Toolbox::getInstance() {
 }
 
 Toolbox::Toolbox(){
-    GameState game;
+    gameState = new GameState;
+    board = gameState->board;
     int col = 25;
     int row = 16;
-    std::vector<std::vector<Tile>> tiles;
+    int per_col = 800/col;
+    int per_row = 510/row;
     for(int i=0; i<row; i++) {
         std::vector<Tile> cur;
         for(int j=0; j<col; j++) {
@@ -25,7 +27,6 @@ Toolbox::Toolbox(){
         tiles.emplace_back(cur);
     }
     window.create(sf::VideoMode(800,600), "P4- Minesweeper, Ben Adelman");
-    gameState = new GameState();
     newGameButton = new Button(sf::Vector2f(400, 510), [this]() {std::cout << "new" <<std::endl;});
     debugButton = new Button(sf::Vector2f(528, 510), [this]() {}); //impliment functions later
     testButton1 = new Button(sf::Vector2f(592, 510), [this]() {});
@@ -60,8 +61,6 @@ Toolbox::Toolbox(){
             }
             if(evnt.type == sf::Event::MouseButtonPressed){
                 if(evnt.mouseButton.button == sf::Mouse::Left) {
-                    std:: cout << evnt.mouseButton.x << std::endl;
-                    std::cout << evnt.mouseButton.y << std::endl;
                     if (newGameButton->getSprite()->getGlobalBounds().contains(evnt.mouseButton.x, evnt.mouseButton.y)) {
                         newGameButton->onClick();
                     }
@@ -74,9 +73,37 @@ Toolbox::Toolbox(){
                     if (testButton2->getSprite()->getGlobalBounds().contains(evnt.mouseButton.x, evnt.mouseButton.y)) {
                         testButton2->onClick();
                     }
+                    if(evnt.mouseButton.y < 510) {
+                        int col_id = (int)(evnt.mouseButton.x / (double)per_col);
+                        int row_id = (int)(evnt.mouseButton.y / (double)per_row);
+                        if(row_id == 16) {
+                            row_id = 15;
+                        }
+                        if(tiles[row_id][col_id].getState() == Tile::HIDDEN) {
+                            if(board[row_id][col_id] == 1) {
+                                tiles[row_id][col_id].setState(Tile::EXPLODED);
+                            } else {
+                                tiles[row_id][col_id].setState(Tile::REVEALED);
+                                tiles[row_id][col_id].revealNeighbors();
+                            }
+                            std::cout << tiles[row_id][col_id].getState() << std::endl;
+                            std::cout << board[row_id][col_id] << std::endl;
+                        }
+                    }
                 }
                 if(evnt.mouseButton.button == sf::Mouse::Right) {
-                    break;
+                    if(evnt.mouseButton.y < 510) {
+                        int col_id = (int)(evnt.mouseButton.x / (double)per_col);
+                        int row_id = (int)(evnt.mouseButton.y / (double)per_row);
+                        if(row_id == 16) {
+                            row_id = 15;
+                        }
+                        std::cout << col_id << " " << row_id << std::endl;
+                        std::cout << tiles[row_id][col_id].getState() << std::endl;
+                        if(tiles[row_id][col_id].getState() == Tile::HIDDEN) {
+                            tiles[row_id][col_id].setState(Tile::FLAGGED);
+                        }
+                    }
                 }
             }
         }
@@ -93,4 +120,3 @@ Toolbox::Toolbox(){
         window.display();
     }
 }
-

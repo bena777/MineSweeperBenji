@@ -1,6 +1,7 @@
 
 #include "Tile.h"
 #include "GameState.h"
+#include "Toolbox.h"
 sf::Texture Tile::tile_hidden_texture;
 sf::Texture Tile::tile_revealed_texture;
 sf::Texture Tile::tile_flagged_texture;
@@ -15,6 +16,7 @@ Tile::Tile(sf::Vector2f position) {
     tile_bomb_texture.loadFromFile("images/mine.png");
     sprite.setTexture(tile_hidden_texture);
     sprite.setPosition(position);
+    state = HIDDEN;
 }
 sf::Vector2f Tile::getLocation() {
     return pos;
@@ -37,6 +39,12 @@ void Tile::draw() {
 Tile::State Tile::getState() {
     return state;
 }
+std::array<Tile *, 8> &Tile::getNeighbors() {
+    return neighbors;
+}
+
+
+
 void Tile::onClickLeft() {
     if(state == HIDDEN) {
         state = REVEALED;
@@ -55,6 +63,3 @@ void Tile::onClickRight() {
 void Tile::setNeighbors(std::array<Tile *, 8> _neighbors) {
     neighbors = _neighbors;
 }
-
-
-
