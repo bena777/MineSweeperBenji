@@ -11,6 +11,11 @@ public:
     sf::Sprite* getSprite();
     void setSprite(sf::Sprite* _sprite);
     void onClick();
+private:
+    sf::Sprite* sprite;
+    sf::Vector2f position;
+    std::function<void()> onClickCallback;
+    sf::RectangleShape button_shape;
 };
 
 
