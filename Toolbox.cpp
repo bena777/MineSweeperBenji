@@ -11,7 +11,7 @@ Toolbox& Toolbox::getInstance() {
     return instance;
 }
 void Toolbox::new_button() {
-    sf::Vector2i dim = sf::Vector2i(gameState->board.size(),gameState->board[0].size());
+    sf::Vector2i dim = sf::Vector2i(25,16);
     delete gameState;
     gameState = new GameState(sf::Vector2i(dim.x,dim.y));
     board = gameState->board;
@@ -46,9 +46,23 @@ void Toolbox::test_2_button() {
     delete gameState;
     gameState = new GameState("testboard2.brd");
     board = gameState->board;
+    tiles.clear();
+    int col = board[0].size();
+    int row = board.size();
+    for(int i=0; i<row*32; i+=32) {
+        std::vector<Tile> cur;
+        for(int j=0; j<col*32; j+=32) {
+            sf::Vector2f tilePosition(j, i); //32 is length/height of tiles
+            cur.emplace_back(tilePosition);
+        }
+        tiles.emplace_back(cur);
+    }
+    std::cout << board.size() << " " << board[0].size() << std::endl;
+    window.clear(sf::Color::White);
     for(int i=0; i<tiles.size(); i++) {
         for(int j=0; j<tiles[0].size();j++) {
             tiles[i][j].setState(Tile::HIDDEN);
+            window.draw(tiles[i][j].sprite);
         }
     }
 }
@@ -67,6 +81,15 @@ Toolbox::Toolbox(){
             cur.emplace_back(tilePosition);
         }
         tiles.emplace_back(cur);
+    }
+    for(int i=0; i<row; i++) {
+        for(int j=0; j<col; j++) {
+            if(board[i][j] == 0) {
+                tiles[i][j].bomb = 0;
+            } else {
+                tiles[i][j].bomb = 1;
+            }
+        }
     }
     window.create(sf::VideoMode(800,600), "P4- Minesweeper, Ben Adelman");
     newGameButton = new Button(sf::Vector2f(400, 510),[this]() { new_button(); }
@@ -128,8 +151,6 @@ Toolbox::Toolbox(){
                             } else {
                                 tiles[row_id][col_id].setState(Tile::REVEALED);
                             }
-                            std::cout << tiles[row_id][col_id].getState() << std::endl;
-                            std::cout << board[row_id][col_id] << std::endl;
                         }
                     }
                 }
@@ -140,13 +161,12 @@ Toolbox::Toolbox(){
                         if(row_id == row) {
                             row_id = row-1;
                         }
-                        std::cout << col_id << " " << row_id << std::endl;
-                        std::cout << tiles[row_id][col_id].getState() << std::endl;
                         tiles[row_id][col_id].onClickRight();
                     }
                 }
             }
         }
+
         window.clear(sf::Color::White);
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
@@ -190,15 +210,12 @@ Toolbox::Toolbox(){
                     window.draw(tiles[i][j].sprite);
                     tiles[i][j].setState(Tile::FLAGGED);
                 }
-                if(tiles[i][j].getState() == Tile::EXPLODED) {
+                if(tiles[i][j].getState() == Tile::EXPLODED) { //double drawing for bombs
                     tiles[i][j].setState(Tile::HIDDEN);
                     window.draw(tiles[i][j].sprite);
                     tiles[i][j].setState(Tile::EXPLODED);
                 }
                 window.draw(tiles[i][j].sprite);
-                if(bombCount == 0) {
-                    tiles[i][j].revealNeighbors();
-                }
                 if(tiles[i][j].getState() == Tile::REVEALED && (bombCount>0)) {
                     sf::Texture numTexture;
                     std::string yo = "images/number_";
@@ -208,6 +225,11 @@ Toolbox::Toolbox(){
                     sf::Sprite numsprite(numTexture);
                     numsprite.setPosition(j*32,i*32);
                     window.draw(numsprite);
+                }
+                if(tiles[i][j].getState() == Tile::REVEALED && (bombCount ==0)) {
+                    for(Tile* tile: neighbors) {
+                        tile->revealNeighbors();
+                    }
                 }
                 tiles[i][j].setNeighbors(neighbors);
             }

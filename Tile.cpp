@@ -2,6 +2,7 @@
 #include "Tile.h"
 #include "GameState.h"
 #include "Toolbox.h"
+#include <iostream>
 sf::Texture Tile::tile_hidden_texture;
 sf::Texture Tile::tile_revealed_texture;
 sf::Texture Tile::tile_flagged_texture;
@@ -64,10 +65,23 @@ void Tile::setNeighbors(std::array<Tile *, 8> _neighbors) {
     neighbors = _neighbors;
 }
 void Tile::revealNeighbors() {
-    1==1;
-    //for(Tile *neighbor: neighbors) {
-        //if(neighbor->getState() == HIDDEN) {
-            //1==1;
-        //}
-    //}
+    if (this!=nullptr) {
+        if (this->getState() != HIDDEN) {
+            return;
+        }
+        this->setState(REVEALED);
+        int mineCount = 0;
+        for (Tile* neighbor : neighbors) {
+            if (neighbor != nullptr && neighbor->bomb == 1) {
+                mineCount++;
+            }
+        }
+        if (mineCount == 0) {
+            for (Tile* neighbor : neighbors) {
+                if (neighbor != nullptr && neighbor->getState() == HIDDEN) {
+                    neighbor->revealNeighbors();
+                }
+            }
+        }
+    }
 }

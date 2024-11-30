@@ -16,8 +16,10 @@ public:
     void onClickLeft();
     void onClickRight();
     void draw();
+protected:
     void revealNeighbors();
 private:
+    int bomb;
     sf::Vector2f pos;
     State state;
     std::array<Tile*,8> neighbors;

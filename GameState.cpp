@@ -6,6 +6,9 @@
 GameState::GameState(sf::Vector2i _dimensions, int _numberOfMines){
     int mines_placed = 0;
     board.resize(_dimensions.x, std::vector<int>(_dimensions.y, 0));
+    if(_numberOfMines > _dimensions.x*_dimensions.y) {
+        _numberOfMines = _dimensions.x*_dimensions.y;
+    }
     srand(time(NULL));
     while(mines_placed<_numberOfMines){
         int num = (rand() % _dimensions.x);
