@@ -10,27 +10,70 @@ Toolbox& Toolbox::getInstance() {
     static Toolbox instance;
     return instance;
 }
+void Toolbox::new_button() {
+    sf::Vector2i dim = sf::Vector2i(gameState->board.size(),gameState->board[0].size());
+    delete gameState;
+    gameState = new GameState(sf::Vector2i(dim.x,dim.y));
+    board = gameState->board;
+    for(int i=0; i<tiles.size(); i++) {
+        for(int j=0; j<tiles[0].size();j++) {
+            tiles[i][j].setState(Tile::HIDDEN);
+        }
+    }
+}
+void Toolbox::debug_button() {
+    for(int i=0; i<tiles.size(); i++) {
+        for(int j=0; j<tiles[0].size();j++) {
+            if(board[i][j] ==0) {
+                tiles[i][j].setState(Tile::REVEALED);
+            } else {
+                tiles[i][j].setState(Tile::EXPLODED);
+            }
+        }
+    }
+}
+void Toolbox::test_1_button() {
+    delete gameState;
+    gameState = new GameState("testboard1.brd");
+    board = gameState->board;
+    for(int i=0; i<tiles.size(); i++) {
+        for(int j=0; j<tiles[0].size();j++) {
+            tiles[i][j].setState(Tile::HIDDEN);
+        }
+    }
+}
+void Toolbox::test_2_button() {
+    delete gameState;
+    gameState = new GameState("testboard2.brd");
+    board = gameState->board;
+    for(int i=0; i<tiles.size(); i++) {
+        for(int j=0; j<tiles[0].size();j++) {
+            tiles[i][j].setState(Tile::HIDDEN);
+        }
+    }
+}
 
 Toolbox::Toolbox(){
-    gameState = new GameState;
+    gameState = new GameState();
     board = gameState->board;
-    int col = 25;
-    int row = 16;
-    int per_col = 800/col;
-    int per_row = 510/row;
-    for(int i=0; i<row; i++) {
+    int col = board[0].size();
+    int row = board.size();
+    int per_col = (col*32)/col; //unnecessary lines but whatever
+    int per_row = (row*32)/row;
+    for(int i=0; i<row*32; i+=32) {
         std::vector<Tile> cur;
-        for(int j=0; j<col; j++) {
-            sf::Vector2f tilePosition(j*32, i*32); //32 is length/height of tiles
+        for(int j=0; j<col*32; j+=32) {
+            sf::Vector2f tilePosition(j, i); //32 is length/height of tiles
             cur.emplace_back(tilePosition);
         }
         tiles.emplace_back(cur);
     }
     window.create(sf::VideoMode(800,600), "P4- Minesweeper, Ben Adelman");
-    newGameButton = new Button(sf::Vector2f(400, 510), [this]() {std::cout << "new" <<std::endl;});
-    debugButton = new Button(sf::Vector2f(528, 510), [this]() {}); //impliment functions later
-    testButton1 = new Button(sf::Vector2f(592, 510), [this]() {});
-    testButton2 = new Button(sf::Vector2f(656, 510), [this]() {});
+    newGameButton = new Button(sf::Vector2f(400, 510),[this]() { new_button(); }
+    );
+    debugButton = new Button(sf::Vector2f(528, 510), [this]() { debug_button(); }); //impliment functions later
+    testButton1 = new Button(sf::Vector2f(592, 510), [this]() { test_1_button(); });
+    testButton2 = new Button(sf::Vector2f(656, 510), [this]() { test_2_button(); });
 
     sf::Texture new_game;
     new_game.loadFromFile("images/face_happy.png");
@@ -73,18 +116,17 @@ Toolbox::Toolbox(){
                     if (testButton2->getSprite()->getGlobalBounds().contains(evnt.mouseButton.x, evnt.mouseButton.y)) {
                         testButton2->onClick();
                     }
-                    if(evnt.mouseButton.y < 510) {
+                    if(evnt.mouseButton.y < row*per_row) {
                         int col_id = (int)(evnt.mouseButton.x / (double)per_col);
                         int row_id = (int)(evnt.mouseButton.y / (double)per_row);
-                        if(row_id == 16) {
-                            row_id = 15;
+                        if(row_id == row) {
+                            row_id = row-1;
                         }
                         if(tiles[row_id][col_id].getState() == Tile::HIDDEN) {
                             if(board[row_id][col_id] == 1) {
                                 tiles[row_id][col_id].setState(Tile::EXPLODED);
                             } else {
                                 tiles[row_id][col_id].setState(Tile::REVEALED);
-                                tiles[row_id][col_id].revealNeighbors();
                             }
                             std::cout << tiles[row_id][col_id].getState() << std::endl;
                             std::cout << board[row_id][col_id] << std::endl;
@@ -95,14 +137,12 @@ Toolbox::Toolbox(){
                     if(evnt.mouseButton.y < 510) {
                         int col_id = (int)(evnt.mouseButton.x / (double)per_col);
                         int row_id = (int)(evnt.mouseButton.y / (double)per_row);
-                        if(row_id == 16) {
-                            row_id = 15;
+                        if(row_id == row) {
+                            row_id = row-1;
                         }
                         std::cout << col_id << " " << row_id << std::endl;
                         std::cout << tiles[row_id][col_id].getState() << std::endl;
-                        if(tiles[row_id][col_id].getState() == Tile::HIDDEN) {
-                            tiles[row_id][col_id].setState(Tile::FLAGGED);
-                        }
+                        tiles[row_id][col_id].onClickRight();
                     }
                 }
             }
@@ -110,7 +150,66 @@ Toolbox::Toolbox(){
         window.clear(sf::Color::White);
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
+                std::array<Tile *, 8> neighbors = {nullptr,nullptr,nullptr,nullptr,
+                    nullptr,nullptr,nullptr,nullptr};
+                int bombCount = 0;
+                if (i > 0 && j > 0) {
+                    neighbors[0] = &tiles[i - 1][j - 1];
+                    if (board[i - 1][j - 1] == 1) bombCount++;
+                }
+                if (i > 0) {
+                    neighbors[1] = &tiles[i - 1][j];
+                    if (board[i - 1][j] == 1) bombCount++;
+                }
+                if (i > 0 && j < col - 1) {
+                    neighbors[2] = &tiles[i - 1][j + 1];
+                    if (board[i - 1][j + 1] == 1) bombCount++;
+                }
+                if (j < col - 1) {
+                    neighbors[3] = &tiles[i][j + 1];
+                    if (board[i][j + 1] == 1) bombCount++;
+                }
+                if (i < row - 1 && j < col - 1) {
+                    neighbors[4] = &tiles[i + 1][j + 1];
+                    if (board[i + 1][j + 1] == 1) bombCount++;
+                }
+                if (i < row - 1) {
+                    neighbors[5] = &tiles[i + 1][j];
+                    if (board[i + 1][j] == 1) bombCount++;
+                }
+                if (i < row - 1 && j > 0) {
+                    neighbors[6] = &tiles[i + 1][j - 1];
+                    if (board[i + 1][j - 1] == 1) bombCount++;
+                }
+                if (j > 0) {
+                    neighbors[7] = &tiles[i][j - 1];
+                    if (board[i][j - 1] == 1) bombCount++;
+                }
+                if(tiles[i][j].getState() == Tile::FLAGGED) { //double drawing for flagged
+                    tiles[i][j].setState(Tile::HIDDEN);
+                    window.draw(tiles[i][j].sprite);
+                    tiles[i][j].setState(Tile::FLAGGED);
+                }
+                if(tiles[i][j].getState() == Tile::EXPLODED) {
+                    tiles[i][j].setState(Tile::HIDDEN);
+                    window.draw(tiles[i][j].sprite);
+                    tiles[i][j].setState(Tile::EXPLODED);
+                }
                 window.draw(tiles[i][j].sprite);
+                if(bombCount == 0) {
+                    tiles[i][j].revealNeighbors();
+                }
+                if(tiles[i][j].getState() == Tile::REVEALED && (bombCount>0)) {
+                    sf::Texture numTexture;
+                    std::string yo = "images/number_";
+                    yo.append(std::to_string(bombCount));
+                    yo.append(".png");
+                    numTexture.loadFromFile(yo);
+                    sf::Sprite numsprite(numTexture);
+                    numsprite.setPosition(j*32,i*32);
+                    window.draw(numsprite);
+                }
+                tiles[i][j].setNeighbors(neighbors);
             }
         }
         window.draw(*newGameButton->getSprite());

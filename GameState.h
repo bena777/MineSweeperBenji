@@ -10,7 +10,7 @@ class GameState {
     friend class Toolbox;
 public:
     enum PlayStatus{WIN, LOSS, PLAYING};
-    GameState(sf::Vector2i _dimensions = sf::Vector2i(25,16), int _numberOfMines =50);
+    GameState(sf::Vector2i _dimensions = sf::Vector2i(16,25), int _numberOfMines =50);
     GameState(const char* filepath);
     int getFlagCount();
     int getMineCount();

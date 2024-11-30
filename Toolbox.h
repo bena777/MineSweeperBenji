@@ -23,6 +23,11 @@ public:
     std::vector<std::vector<int>> board;
     static Toolbox &getInstance();
     std::vector<std::vector<Tile>> tiles;
+    std::vector<std::vector<int>> bomb_neighbors;
+    void new_button();
+    void debug_button();
+    void test_1_button();
+    void test_2_button();
 
 private:
     Toolbox();

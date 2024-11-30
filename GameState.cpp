@@ -51,7 +51,3 @@ void GameState::setPlayStatus(PlayStatus _status) {
 GameState::PlayStatus GameState::getPlayStatus() {
     return status;
 }
-
-
-
-

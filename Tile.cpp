@@ -53,13 +53,21 @@ void Tile::onClickLeft() {
 }
 void Tile::onClickRight() {
     if(state == FLAGGED) {
-        state = HIDDEN;
+        this->setState(HIDDEN);
     } else if (state == HIDDEN) {
-        state = FLAGGED;
+        this->setState(FLAGGED);
     }
 }
 
 
 void Tile::setNeighbors(std::array<Tile *, 8> _neighbors) {
     neighbors = _neighbors;
+}
+void Tile::revealNeighbors() {
+    1==1;
+    //for(Tile *neighbor: neighbors) {
+        //if(neighbor->getState() == HIDDEN) {
+            //1==1;
+        //}
+    //}
 }
