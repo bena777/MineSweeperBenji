@@ -5,6 +5,7 @@
 
 class Tile {
     friend class Toolbox;
+    friend class GameState;
 public:
     enum State{REVEALED, HIDDEN, FLAGGED, EXPLODED};
     Tile(sf::Vector2f position);

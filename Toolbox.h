@@ -13,6 +13,7 @@
 class GameState;
 class Toolbox {
     friend class GameState;
+    friend class Tile;
 public:
     sf::RenderWindow window;
     GameState *gameState;
@@ -31,8 +32,14 @@ public:
     bool current;
     sf::Sprite new_game_sprite;
     sf::Texture new_game;
+    sf::Sprite new_game_good_sprite;
+    sf::Sprite new_game_bad_sprite;
     int flags = 0;
-
+    void bombom(int row, int col);
+    void displayCounter(sf::RenderWindow& window, int number, const sf::Texture& texture, float startX, float startY);
+    sf::Texture digitsTexture;
+    bool debug = false;
+    void checkWin();
 private:
     Toolbox();
 };

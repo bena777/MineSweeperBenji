@@ -11,10 +11,10 @@ sf::Texture Tile::tile_bomb_texture;
 
 Tile::Tile(sf::Vector2f position) {
     pos = position;
-    tile_hidden_texture.loadFromFile("images/tile_hidden.png");
-    tile_revealed_texture.loadFromFile("images/tile_revealed.png");
-    tile_flagged_texture.loadFromFile("images/flag.png");
-    tile_bomb_texture.loadFromFile("images/mine.png");
+    tile_hidden_texture.loadFromFile("P4-data/images/tile_hidden.png");
+    tile_revealed_texture.loadFromFile("P4-data/images/tile_revealed.png");
+    tile_flagged_texture.loadFromFile("P4-data/images/flag.png");
+    tile_bomb_texture.loadFromFile("P4-data/images/mine.png");
     sprite.setTexture(tile_hidden_texture);
     sprite.setPosition(position);
     state = HIDDEN;
