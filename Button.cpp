@@ -1,5 +1,5 @@
 
-
+#include <iostream>
 #include "Button.h"
 
 Button::Button(sf::Vector2f _position, std::function<void()> _onClick) {

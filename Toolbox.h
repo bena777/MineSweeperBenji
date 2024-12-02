@@ -36,6 +36,8 @@ public:
     sf::Sprite new_game_bad_sprite;
     int flags = 0;
     void bombom(int row, int col);
+    void initializeTiles();
+    sf::Sprite getDigitSprite(int digit, const sf::Texture& texture);
     void displayCounter(sf::RenderWindow& window, int number, const sf::Texture& texture, float startX, float startY);
     sf::Texture digitsTexture;
     bool debug = false;

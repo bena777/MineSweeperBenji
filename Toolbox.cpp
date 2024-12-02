@@ -15,16 +15,41 @@ void Toolbox::new_button() {
     newGameButton->setSprite(&new_game_sprite);
     current = true;
     sf::Vector2i dim = sf::Vector2i(25,16);
+    tiles.clear();
     gameState = new GameState(sf::Vector2i(dim.x,dim.y));
     board = gameState->board;
-    for(int i=0; i<tiles.size(); i++) {
-        for(int j=0; j<tiles[0].size();j++) {
+    for (int i = 0; i < dim.y; ++i) {
+        std::vector<Tile> cur;
+        for (int j = 0; j < dim.x; ++j) {
+            sf::Vector2f tilePosition(j * 32, i * 32);
+            Tile newTile(tilePosition);
+            newTile.bomb = board[i][j];
+            cur.emplace_back(newTile);
+        }
+        tiles.push_back(cur);
+    }
+    for (int i = 0; i < dim.y; ++i) {
+        for (int j = 0; j < dim.x; ++j) {
+            std::array<Tile*, 8> neighbors = {nullptr};
+            if (i > 0 && j > 0) neighbors[0] = &tiles[i-1][j-1];
+            if (i > 0) neighbors[1] = &tiles[i-1][j];
+            if (i > 0 && j < dim.x - 1) neighbors[2] = &tiles[i-1][j+1];
+            if (j < dim.x - 1) neighbors[3] = &tiles[i][j+1];
+            if (i < dim.y - 1 && j < dim.x - 1) neighbors[4] = &tiles[i+1][j+1];
+            if (i < dim.y - 1) neighbors[5] = &tiles[i+1][j];
+            if (i < dim.y - 1 && j > 0) neighbors[6] = &tiles[i+1][j-1];
+            if (j > 0) neighbors[7] = &tiles[i][j-1];
+            tiles[i][j].setNeighbors(neighbors);
+        }
+    }
+    for(int i = 0; i < tiles.size(); i++) {
+        for(int j = 0; j < tiles[0].size(); j++) {
             tiles[i][j].setState(Tile::HIDDEN);
         }
     }
     flags = 0;
-    displayCounter(window,gameState->getMineCount()-flags,digitsTexture,0,510);
-    bombom(dim.y,dim.x);
+    displayCounter(window, gameState->getMineCount() - flags, digitsTexture, 0, 510);
+    bombom(dim.y, dim.x);
 }
 void Toolbox::debug_button() {
     if(not debug) {
@@ -47,12 +72,36 @@ void Toolbox::test_1_button() {
     delete gameState;
     gameState = new GameState("P4-data/boards/testboard1.brd");
     board = gameState->board;
-    for(int i=0; i<tiles.size(); i++) {
-        for(int j=0; j<tiles[0].size();j++) {
+    tiles.clear();
+    int col = board[0].size();
+    int row = board.size();
+    for (int i = 0; i < row; ++i) {
+        std::vector<Tile> cur;
+        for (int j = 0; j < col; ++j) {
+            sf::Vector2f tilePosition(j * 32, i * 32);
+            Tile newTile(tilePosition);
+            newTile.bomb = board[i][j];
+            cur.emplace_back(newTile);
+        }
+        tiles.push_back(cur);
+    }
+    for (int i = 0; i < row; ++i) {
+        for (int j = 0; j < col; ++j) {
+            std::array<Tile*, 8> neighbors = {nullptr};
+            if (i > 0 && j > 0) neighbors[0] = &tiles[i-1][j-1];
+            if (i > 0) neighbors[1] = &tiles[i-1][j];
+            if (i > 0 && j < col - 1) neighbors[2] = &tiles[i-1][j+1];
+            if (j < col - 1) neighbors[3] = &tiles[i][j+1];
+            if (i < row - 1 && j < col - 1) neighbors[4] = &tiles[i+1][j+1];
+            if (i < row - 1) neighbors[5] = &tiles[i+1][j];
+            if (i < row - 1 && j > 0) neighbors[6] = &tiles[i+1][j-1];
+            if (j > 0) neighbors[7] = &tiles[i][j-1];
+            tiles[i][j].setNeighbors(neighbors);
             tiles[i][j].setState(Tile::HIDDEN);
         }
     }
 }
+
 void Toolbox::test_2_button() {
     flags = 0;
     newGameButton->setSprite(&new_game_sprite);
@@ -63,18 +112,34 @@ void Toolbox::test_2_button() {
     tiles.clear();
     int col = board[0].size();
     int row = board.size();
-    for(int i=0; i<row*32; i+=32) {
+    for (int i = 0; i < row; ++i) {
         std::vector<Tile> cur;
-        for(int j=0; j<col*32; j+=32) {
-            sf::Vector2f tilePosition(j, i); //32 is length/height of tiles
-            cur.emplace_back(tilePosition);
+        for (int j = 0; j < col; ++j) {
+            sf::Vector2f tilePosition(j * 32, i * 32);
+            Tile newTile(tilePosition);
+            newTile.bomb = board[i][j];
+            cur.emplace_back(newTile);
         }
-        tiles.emplace_back(cur);
+        tiles.push_back(cur);
+    }
+    for (int i = 0; i < row; ++i) {
+        for (int j = 0; j < col; ++j) {
+            std::array<Tile*, 8> neighbors = {nullptr};
+            if (i > 0 && j > 0) neighbors[0] = &tiles[i-1][j-1];
+            if (i > 0) neighbors[1] = &tiles[i-1][j];
+            if (i > 0 && j < col - 1) neighbors[2] = &tiles[i-1][j+1];
+            if (j < col - 1) neighbors[3] = &tiles[i][j+1];
+            if (i < row - 1 && j < col - 1) neighbors[4] = &tiles[i+1][j+1];
+            if (i < row - 1) neighbors[5] = &tiles[i+1][j];
+            if (i < row - 1 && j > 0) neighbors[6] = &tiles[i+1][j-1];
+            if (j > 0) neighbors[7] = &tiles[i][j-1];
+            tiles[i][j].setNeighbors(neighbors);
+            tiles[i][j].setState(Tile::HIDDEN);
+        }
     }
     window.clear(sf::Color::White);
-    for(int i=0; i<tiles.size(); i++) {
-        for(int j=0; j<tiles[0].size();j++) {
-            tiles[i][j].setState(Tile::HIDDEN);
+    for(int i = 0; i < tiles.size(); i++) {
+        for(int j = 0; j < tiles[0].size(); j++) {
             window.draw(tiles[i][j].sprite);
         }
     }
@@ -83,7 +148,7 @@ void Toolbox::test_2_button() {
 
 
  void Toolbox::bombom(int row, int col) { //helper function that sets neighbors and draws tiles
-        window.clear(sf::Color::White);
+        std::cout << "yes" <<std::endl;
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
                 std::array<Tile *, 8> neighbors = {nullptr,nullptr,nullptr,nullptr,
@@ -131,6 +196,7 @@ void Toolbox::test_2_button() {
                     window.draw(tiles[i][j].sprite);
                     tiles[i][j].setState(Tile::EXPLODED);
                 }
+                tiles[i][j].setNeighbors(neighbors);
                 window.draw(tiles[i][j].sprite);
                 if(tiles[i][j].getState() == Tile::REVEALED && (bombCount>0)) {
                     sf::Texture numTexture;
@@ -146,13 +212,11 @@ void Toolbox::test_2_button() {
                     for(Tile* tile: neighbors) {
                         tile->revealNeighbors();
                     }
-                    tiles[i][j].revealNeighbors();
                 }
-                tiles[i][j].setNeighbors(neighbors);
             }
         }
 }
-sf::Sprite getDigitSprite(int digit, const sf::Texture& texture) {
+sf::Sprite Toolbox::getDigitSprite(int digit, const sf::Texture& texture) {
     sf::Sprite sprite(texture);
     int charIndex = (digit == -1) ? 10 : digit;
     sprite.setTextureRect(sf::IntRect(charIndex * 21, 0, 21, 32));
@@ -247,7 +311,6 @@ Toolbox::Toolbox(){
 
     sf::Texture digitsTexture;
     digitsTexture.loadFromFile("P4-data/images/digits.png");
-
     while(window.isOpen()){
         sf::Event evnt;
         while(window.pollEvent(evnt)){
@@ -255,6 +318,14 @@ Toolbox::Toolbox(){
                 window.close();
                 break;
             }
+            window.clear(sf::Color::White);
+            bombom(row,col);
+            displayCounter(window,gameState->getMineCount()-flags,digitsTexture,0,510);
+            window.draw(*newGameButton->getSprite());
+            window.draw(*debugButton->getSprite());
+            window.draw(*testButton1->getSprite());
+            window.draw(*testButton2->getSprite());
+            window.display();
             if(evnt.type == sf::Event::MouseButtonPressed){
                 if(evnt.mouseButton.button == sf::Mouse::Left) {
                     if (newGameButton->getSprite()->getGlobalBounds().contains(evnt.mouseButton.x, evnt.mouseButton.y)) {
@@ -328,13 +399,6 @@ Toolbox::Toolbox(){
                     }
                 }
             }
-            bombom(row,col);
-            displayCounter(window,gameState->getMineCount()-flags,digitsTexture,0,510);
-            window.draw(*newGameButton->getSprite());
-            window.draw(*debugButton->getSprite());
-            window.draw(*testButton1->getSprite());
-            window.draw(*testButton2->getSprite());
-            window.display();
         }
     }
 }
