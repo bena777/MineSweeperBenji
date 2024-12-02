@@ -28,6 +28,10 @@ public:
     void debug_button();
     void test_1_button();
     void test_2_button();
+    bool current;
+    sf::Sprite new_game_sprite;
+    sf::Texture new_game;
+    int flags = 0;
 
 private:
     Toolbox();

@@ -11,6 +11,8 @@ Toolbox& Toolbox::getInstance() {
     return instance;
 }
 void Toolbox::new_button() {
+    newGameButton->setSprite(&new_game_sprite);
+    current = true;
     sf::Vector2i dim = sf::Vector2i(25,16);
     delete gameState;
     gameState = new GameState(sf::Vector2i(dim.x,dim.y));
@@ -33,6 +35,8 @@ void Toolbox::debug_button() {
     }
 }
 void Toolbox::test_1_button() {
+    newGameButton->setSprite(&new_game_sprite);
+    current = true;
     delete gameState;
     gameState = new GameState("testboard1.brd");
     board = gameState->board;
@@ -43,6 +47,8 @@ void Toolbox::test_1_button() {
     }
 }
 void Toolbox::test_2_button() {
+    newGameButton->setSprite(&new_game_sprite);
+    current = true;
     delete gameState;
     gameState = new GameState("testboard2.brd");
     board = gameState->board;
@@ -69,6 +75,7 @@ void Toolbox::test_2_button() {
 
 Toolbox::Toolbox(){
     gameState = new GameState();
+    current = true;
     board = gameState->board;
     int col = board[0].size();
     int row = board.size();
@@ -98,9 +105,14 @@ Toolbox::Toolbox(){
     testButton1 = new Button(sf::Vector2f(592, 510), [this]() { test_1_button(); });
     testButton2 = new Button(sf::Vector2f(656, 510), [this]() { test_2_button(); });
 
-    sf::Texture new_game;
+    sf::Texture new_game_bad;
+    sf::Texture new_game_good;
     new_game.loadFromFile("images/face_happy.png");
-    sf::Sprite new_game_sprite(new_game);
+    new_game_bad.loadFromFile("images/face_lose.png");
+    new_game_good.loadFromFile("images/face_win.png");
+    new_game_sprite.setTexture(new_game);
+    sf::Sprite new_game_bad_sprite(new_game_bad);
+    sf::Sprite new_game_good_sprite(new_game_good);
     newGameButton->setSprite(&new_game_sprite);
 
     sf::Texture debug;
@@ -145,14 +157,18 @@ Toolbox::Toolbox(){
                         if(row_id == row) {
                             row_id = row-1;
                         }
-                        if(tiles[row_id][col_id].getState() == Tile::HIDDEN) {
+                        if(tiles[row_id][col_id].getState() == Tile::HIDDEN && current) {
                             if(board[row_id][col_id] == 1) {
+                                current = false;
+                                newGameButton->setSprite(&new_game_bad_sprite);
                                 tiles[row_id][col_id].setState(Tile::EXPLODED);
                             } else {
                                 tiles[row_id][col_id].setState(Tile::REVEALED);
                             }
                         }
+                        for(int i=0; i<)
                     }
+
                 }
                 if(evnt.mouseButton.button == sf::Mouse::Right) {
                     if(evnt.mouseButton.y < 510) {
@@ -162,6 +178,13 @@ Toolbox::Toolbox(){
                             row_id = row-1;
                         }
                         tiles[row_id][col_id].onClickRight();
+                        if(tiles[row_id][col_id].getState() == Tile::FLAGGED) {
+                            flags++;
+                        }
+                        if(tiles[row_id][col_id].getState() == Tile::HIDDEN) {
+                            flags--;
+                        }
+                        std::cout << flags << std::endl;
                     }
                 }
             }
@@ -230,6 +253,7 @@ Toolbox::Toolbox(){
                     for(Tile* tile: neighbors) {
                         tile->revealNeighbors();
                     }
+                    tiles[i][j].revealNeighbors();
                 }
                 tiles[i][j].setNeighbors(neighbors);
             }

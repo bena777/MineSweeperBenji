@@ -19,6 +19,7 @@ GameState::GameState(sf::Vector2i _dimensions, int _numberOfMines){
         }
     }
 }
+
 GameState::GameState(const char *filepath) {
     std::ifstream inStream(filepath);
     std::string w;
@@ -37,6 +38,7 @@ GameState::GameState(const char *filepath) {
         board.push_back(li);
     }
 }
+
 int GameState::getMineCount() {
     int count = 0;
     for(int i=0; i<board.size(); i++) {
